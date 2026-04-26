@@ -1,0 +1,27 @@
+# =====================
+# ENV FILES (IMPORTANT)
+# =====================
+.env
+RideShare-backend/.env
+**/.env
+**/.env.*
+
+# =====================
+# NODE MODULES
+# =====================
+node_modules/
+RideShare-frontend/node_modules/
+RideShare-backend/node_modules/
+
+# =====================
+# BUILDS
+# =====================
+RideShare-frontend/build/
+dist/
+build/
+
+# =====================
+# LOGS
+# =====================
+npm-debug.log*
+yarn-error.log*
