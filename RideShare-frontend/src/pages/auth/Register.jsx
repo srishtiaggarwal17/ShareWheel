@@ -18,22 +18,16 @@ import { Label } from "../../components/ui/label";
 import { useToast } from "../../hooks/use-toast";
 import { Car } from "lucide-react";
 
+// Helper function to validate NITJ email
+const isValidNITJEmail = (email) => {
+  return email && email.toLowerCase().endsWith('@nitj.ac.in');
+};
+
 const Register = () => {
   const { register: registerUser, setAuthError } = useUserContext();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   watch,
-  //   formState: { errors },
-  // } = useForm({
-  //   defaultValues: {
-  //     role: "rider",
-  //   },
-  // });
 
   const {
     register,
@@ -47,6 +41,18 @@ const Register = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
 
+    // Validate NITJ email domain
+    if (!isValidNITJEmail(data.email)) {
+      setAuthError("Only @nitj.ac.in email addresses are allowed");
+      toast({
+        title: "Registration failed",
+        description: "Please use your NITJ email address (@nitj.ac.in) to register.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
@@ -55,7 +61,6 @@ const Register = () => {
           name: data.name,
           email: data.email,
           password: data.password,
-          // role: data.role,
         }),
       });
 
@@ -98,7 +103,7 @@ const Register = () => {
             Create an account
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your information to get started
+            Register with your NITJ email address
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -118,17 +123,19 @@ const Register = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">NITJ Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="name@example.com"
+                placeholder="yourname@nitj.ac.in"
                 {...register("email", {
                   required: "Email is required",
                   pattern: {
                     value: /^\S+@\S+$/i,
                     message: "Invalid email address",
                   },
+                  validate: (value) => 
+                    isValidNITJEmail(value) || "Only @nitj.ac.in email addresses are allowed"
                 })}
               />
               {errors.email && (
@@ -177,17 +184,6 @@ const Register = () => {
                 </p>
               )}
             </div>
-            {/* <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <select id="role" {...register("role", { required: "Role is required" })} className="w-full border rounded p-2">
-                <option value="">Select a role</option>
-                <option value="rider">Rider</option>
-                <option value="passenger">Passenger</option>
-              </select>
-              {errors.role && (
-                <p className="text-sm text-destructive">{errors.role.message}</p>
-              )}
-            </div> */}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Creating account..." : "Sign up"}
