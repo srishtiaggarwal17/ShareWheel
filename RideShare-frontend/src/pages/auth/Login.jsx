@@ -10,6 +10,11 @@ import { Label } from "../../components/ui/label";
 import { useToast } from "../../hooks/use-toast";
 import { Car } from "lucide-react";
 
+// Helper function to validate NITJ email
+const isValidNITJEmail = (email) => {
+  return email && email.toLowerCase().endsWith('@nitj.ac.in');
+};
+
 const Login = () => {
   const { login, setAuthError } = useUserContext();
   const navigate = useNavigate();
@@ -25,6 +30,18 @@ const Login = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
 
+    // Validate NITJ email domain
+    if (!isValidNITJEmail(data.email)) {
+      setAuthError("Only @nitj.ac.in email addresses are allowed");
+      toast({
+        title: "Login failed",
+        description: "Please use your NITJ email address (@nitj.ac.in) to login.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
@@ -33,7 +50,7 @@ const Login = () => {
       });
 
       const responseData = await res.json();
-      console.log("Login response:", responseData); // ✅ helpful debug log
+      console.log("Login response:", responseData);
 
       if (res.ok && responseData.token && responseData.user) {
         const { _id, name, email} = responseData.user;
@@ -83,23 +100,25 @@ const Login = () => {
             Welcome back
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access your account
+            Enter your NITJ email and password to access your account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">NITJ Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="name@example.com"
+                placeholder="yourname@nitj.ac.in"
                 {...register("email", {
                   required: "Email is required",
                   pattern: {
                     value: /^\S+@\S+$/i,
                     message: "Invalid email address",
                   },
+                  validate: (value) => 
+                    isValidNITJEmail(value) || "Only @nitj.ac.in email addresses are allowed"
                 })}
               />
               {errors.email && (
@@ -111,12 +130,6 @@ const Login = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                {/* <Link
-                  to="/forgot-password"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link> */}
               </div>
               <Input
                 id="password"
